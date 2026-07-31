@@ -4,11 +4,11 @@
 > sincrónica** del examen. Toma menos de 5 minutos y es lo único con horario fijo:
 > después trabajas a tu ritmo hasta el plazo del día siguiente.
 
-- **Nombre completo:**
-- **Cédula:**
-- **NRC:**
-- **Nonce del examen:**            <!-- código publicado por el docente en la sesión -->
-- **Fecha y hora de inicio:**      <!-- formato: 2026-XX-XX HH:MM -->
+- **Nombre completo: Angie Nicole Alvarado Alcívar**
+- **Cédula: 1726955972**
+- **NRC: 30405**
+- **Nonce del examen:AGS-2026 **            <!-- código publicado por el docente en la sesión -->
+- **Fecha y hora de inicio: 2026-07-30 19:56**      <!-- formato: 2026-XX-XX HH:MM -->
 
 ---
 
@@ -17,13 +17,13 @@
 Sean `NN` los **dos últimos dígitos** de mi cédula. No hay cálculos: se copian dígitos y
 se busca en una tabla.
 
-| # | Parámetro | Cómo se obtiene | Mi valor |
-|:---:|-----------|-----------------|----------|
-| — | `NN` | los 2 últimos dígitos de mi cédula | |
-| 1 | Nombre de la tabla | `tbl_productos_base_` + `NN` | |
-| 2 | Puerto | `81` + `NN` | |
-| 3 | Categoría | según el **último dígito** (tabla de abajo) | |
-| — | Audiencia para el prompt de IA | según la categoría | |
+| # | Parámetro                      | Cómo se obtiene                             | Mi valor                   |
+|:---:|--------------------------------|---------------------------------------------|----------------------------|
+| — | `72`                           | los 2 últimos dígitos de mi cédula          | 72                         |
+| 1 | Nombre de la tabla             | `tbl_productos_base_` + `72`                | tbl_productos_base_72      |
+| 2 | Puerto                         | `81` + `72`                                 | 8172                       |
+| 3 | Categoría                      | según el **último dígito** (tabla de abajo) | Café                       |
+| — | Audiencia para el prompt de IA | según la categoría                          | cafeterías de especialidad |
 
 **Tabla de categorías:**
 
@@ -35,7 +35,7 @@ se busca en una tabla.
 | 6 o 7 | Flores | floristerías premium |
 | 8 o 9 | Quinua | tiendas de alimentación saludable |
 
-> ✅ **Autocomprobación:** mi puerto empieza por `81` y termina con los mismos dos
+> ✅ **Autocomprobación:** mi puerto empieza por `81 y termina con los mismos dos
 > dígitos que el nombre de mi tabla.
 
 **Valores fijos, iguales para todo el curso:** base de datos `agrosmart_db`,
@@ -63,4 +63,4 @@ Declaro que este repositorio es de mi autoría individual, que sustentaré oralm
 decisión de diseño que contiene, y que el historial de commits refleja fielmente el
 proceso de desarrollo que realicé.
 
-**Firma (nombre completo):**
+**Firma (nombre completo): Angie Nicole Alvarado Alcívar**
