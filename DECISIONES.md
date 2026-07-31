@@ -94,24 +94,38 @@ lo fuera? (piensa en la restricción `unique` de `nombre_producto`)
 **3.1** ¿Por qué tienes **dos** clases (`ProductoEntity` y `Producto`) en lugar de una?
 ¿Qué te impide hacer inmutable directamente la entidad de Hibernate?
 
->
+>Use dos clases porque tienen trabajos distintos: ProductoEntity sirve solo para conectar con la base de datos (PostgreSQL), y Producto es mi modelo de trabajo seguro para la lógica del programa. No pude hacer inmutable a ProductoEntity porque Hibernate me obliga a ponerle variables editables (setters), un constructor vacío y prohibe que sea final, ya que necesita modificar los datos internamente cuando lee la base de datos.
 
 **3.2** Escribe el código exacto de **tus dos** copias defensivas e indica en qué línea
 está cada una.
 
 ```java
+// Copia defensiva de ENTRADA (Línea 21, dentro del constructor de mi clase Producto.java):
+this.correosNotificacion = (correosNotificacion != null) ? new ArrayList<>(correosNotificacion) : new ArrayList<>();
 
+// Copia defensiva de SALIDA (Línea 42, dentro del método getCorreosNotificacion() en Producto.java):
+public List<String> getCorreosNotificacion() {
+    return Collections.unmodifiableList(new ArrayList<>(correosNotificacion));
+}
 ```
 
 **3.3** ¿Por qué la copia defensiva **solo en el getter** no sería suficiente? Describe
 el ataque concreto que quedaría abierto sobre **tu** clase.
 
->
+>Porque si solo protejo la salida (getter), la persona que creó la lista de correos antes de mandármela al constructor todavía tiene el control sobre esa lista original.
+>Ataque concreto: Alguien podría crear una lista de correos, pasármela para crear el Producto, y luego desde fuera hacer lista.clear() o agregar lista.add("correo_hacker@test.com"). Eso modificaría los correos de mi producto en secreto sin pasar por el getter y sin mi permiso.
 
 **3.4** ¿Cómo implementaste `A_MAYUSCULAS` para no mutar el `Producto` recibido?
 
 ```java
-
+public static final Function<Producto, Producto> A_MAYUSCULAS = producto -> 
+        new Producto(
+                producto.getId(),
+                producto.getNombre() != null ? producto.getNombre().toUpperCase() : null,
+                producto.getCategoria(),
+                producto.getPrecioUsd(),
+                producto.getCorreosNotificacion()
+        );
 ```
 
 ---
@@ -121,14 +135,33 @@ el ataque concreto que quedaría abierto sobre **tu** clase.
 **4.1** Pega tu método `obtenerProductosComercializables()` completo.
 
 ```java
-
+public Flux<Producto> obtenerProductosComercializables() {
+    // Mono.fromCallable: Difiere la consulta bloqueante a JPA para que no se ejecute hasta la suscripción
+    return Mono.fromCallable(repository::findAll)
+            // subscribeOn(Schedulers.boundedElastic()): Aísla la operación I/O bloqueante de JPA fuera del event loop de Netty
+            .subscribeOn(Schedulers.boundedElastic())
+            // flatMapMany: Convierte la lista síncrona materializada (List<ProductoEntity>) en un flujo asíncrono (Flux)
+            .flatMapMany(Flux::fromIterable)
+            // map: Transforma la entidad del ORM al modelo de dominio inmutable
+            .map(ProductoMapper::toDominio)
+            // map: Aplica la transformación funcional para convertir el nombre a mayúsculas retornando una nueva instancia
+            .map(ProductoFilters.A_MAYUSCULAS)
+            // filter: Filtra los productos descartando los que no cumplan la regla de negocio (precio > 0 y correos no vacíos)
+            .filter(ProductoFilters.IS_VALID)
+            // doOnNext: Permite ejecutar un efecto secundario no invasivo (log) sin alterar los elementos emitidos
+            .doOnNext(ProductoFilters.LOG_PRODUCTO)
+            // defaultIfEmpty: Emite un elemento por defecto si los filtros descartaron la totalidad del flujo
+            .defaultIfEmpty(PRODUCTO_GENERICO);
+}
 ```
 
 **4.2** ¿Qué pasa **exactamente** si eliminas
 `.subscribeOn(Schedulers.boundedElastic())` de ese método? Si lo probaste, indica qué
 hilo aparecía en el log antes y después.
 
->
+>Si lo quito, la consulta pesada a la base de datos se ejecuta en el mismo hilo web que atiende a los usuarios (reactor-http-nio-*), lo que "congela" el servidor y frena a otros usuarios.
+>Con boundedElastic(): La consulta corrió en un hilo de trabajo en segundo plano: boundedElastic-1.
+>Sin boundedElastic(): La consulta congeló directamente el hilo de red principal: reactor-http-nio-2.
 
 **4.3** ¿Por qué `Mono.fromCallable(...)` y no `Mono.just(repository.findAll())`?
 (pista: cuándo se ejecuta cada uno)
@@ -138,12 +171,16 @@ hilo aparecía en el log antes y después.
 **4.4** En **tu** código, ¿dónde usaste `defaultIfEmpty` y dónde `switchIfEmpty`, y por
 qué no son intercambiables en esos dos lugares?
 
->
+>Mono.just(...) ejecuta la consulta a la base de datos de inmediato, apenas se lee la línea de código, ignorando los cambios de hilo.
+>Mono.fromCallable(...) en cambio espera pacientemente y solo ejecuta la consulta cuando alguien la necesita, lo que permite que el cambio de hilo con subscribeOn funcione correctamente.
 
 **4.5** ¿Por qué `doOnNext` no sirve para transformar el elemento, si aparentemente
 "recibe" el producto?
 
->
+>En obtenerProductosComercializables() usé defaultIfEmpty porque si no había productos, quería entregar directamente un producto genérico de repuesto.
+>En buscarPorId() usé switchIfEmpty porque si el ID no existía, quería lanzar una excepción (un error).
+>No son intercambiables porque: defaultIfEmpty solo sirve para entregar un dato o valor fijo ya creado, mientras que switchIfEmpty te permite cambiar de ruta y activar una acción o un error (Mono.error).
+
 
 ---
 
@@ -152,23 +189,44 @@ qué no son intercambiables en esos dos lugares?
 **5.1** Pega tu interfaz `AgroSmartAIService` completa.
 
 ```java
+package ec.edu.espe.agrosmart.service;
 
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import dev.langchain4j.service.spring.AiService;
+
+@AiService
+public interface AgroSmartAIService {
+
+    @UserMessage("""
+            Redacta una frase publicitaria llamativa de máximo 100 caracteres para vender \
+            {{producto}} dirigido a {{audiencia}}.""")
+    String generarPublicidad(@V("producto") String producto,
+                             @V("audiencia") String audiencia);
+}
 ```
 
 **5.2** ¿Qué hace `@V("producto")` y qué pasaría si lo quitaras dejando solo el
 parámetro?
 
->
+>En sí la anotación @V("producto") sirve para vincular el valor que va a recibir la variable del método Java con la etiqueta {{producto}} dentro del texto del prompt.  Si la quitara, LangChain4j no sabría qué variable reemplaza a cuál dentro de la plantilla y lanzaría un error al compilar el proyecto porque los nombres de los parámetros no quedarían mapeados.
 
 **5.3** ¿En qué archivo y con qué líneas configuraste el modelo? ¿Por qué **no** hizo
 falta declarar un `@Bean`?
 
->
+>Lo configuré en el archivo src/main/resources/application-prod.properties agregando estas líneas:
+> langchain4j.open-ai.chat-model.api-key=demo
+langchain4j.open-ai.chat-model.model-name=gpt-4o-mini
+langchain4j.open-ai.chat-model.timeout=30s
+langchain4j.open-ai.chat-model.log-requests=true
+langchain4j.open-ai.chat-model.log-responses=true
+logging.level.dev.langchain4j=DEBUG
+> Además que no hizo falta declarar un @Bean porque la librería langchain4j-open-ai-spring-boot-starter detecta esas propiedades automáticamente y crea el componente por detrás sin que yo tenga que escribir código Java adicional.
 
 **5.4** ¿Por qué la llamada a la IA también necesita `boundedElastic`, si no es una
 consulta a base de datos?
 
->
+>Porque la llamada a la API de la IA es una petición HTTP síncrona a un servidor externo. Si no usara boundedElastic, la espera de la respuesta congelaría el hilo principal de Netty, bloqueando el servidor y evitando que atienda a otros usuarios mientras la IA responde.
 
 **5.5** Si tu proveedor devolvió un error durante el examen, pega el mensaje real y la
 respuesta que produjo tu `onErrorResume`.
