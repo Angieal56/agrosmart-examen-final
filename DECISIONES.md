@@ -17,10 +17,10 @@
 
 ## Datos
 
-- **Nombre:**
-- **Cédula:**
-- **NN (dos últimos dígitos):**
-- **Categoría asignada (según el último dígito):**
+- **Nombre: Angie Nicole Alvarado Alcivar**
+- **Cédula: 172695972**
+- **NN (dos últimos dígitos): 72**
+- **Categoría asignada (según el último dígito): Café**
 
 ---
 
@@ -28,23 +28,25 @@
 
 **1.1** ¿Qué archivo activa el perfil `prod` y qué línea exacta lo hace?
 
->
+> El archivo que activóel perfil es src/main/resources/aplication.properties y la linea exacta que lo hace es la linea 2: spring.profiles.active=prod
+
 
 **1.2** Pega la línea del log de arranque donde se ve tu puerto y el perfil activo.
 
 ```
-
+2026-07-31T07:11:14.045-05:00  INFO 24372 --- [agrosmart] [           main] e.e.espe.agrosmart.AgrosmartApplication  : The following 1 profile is active: "prod"
+2026-07-31T07:11:17.984-05:00  INFO 24372 --- [agrosmart] [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8172 (http)
 ```
 
 **1.3** ¿Qué habría pasado si dejabas `ddl-auto=create-drop` en lugar de `update`?
 Responde pensando en tus datos sembrados.
 
->
+>si hubiera dejado ddl-auto=create-drop, posiblemente Hibernate eliminaría todas las tablas existentes en mi bdd al cerrar la aplicación y las volvería a crear desde cero cada vez que se inicie provocando que se pierdan todos los datos de manera definitiva en cada reinicio. Con update se va a conservar la información existente y solo se actualizará el esquema de la bdd según los cambios en las entidades JPA
 
 **1.4** ¿Levantaste PostgreSQL con `compose.yaml` (Opción A) o con una instalación local
 (Opción B)? ¿Qué ventaja tiene la que elegiste?
 
->
+> Usé la opción B teniendo Postgree instalado como local, considero que talvez la principal ventaka es el consumo de recursos al ejecutarse como un servicio nativo de Windows sin depender del daemon de Docker y mantiene las bdd realizadas previamente listas para enviar a producción sin riesgo de recreación del contenedor
 
 ---
 
