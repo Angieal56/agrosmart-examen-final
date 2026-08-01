@@ -331,19 +331,29 @@ de copia defensiva?
 **8.1** Pega tu `git log --oneline --graph --all`.
 
 ```
+PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAFINAL\agrosmart-examen-final> git log --oneline --graph --all
+* b982d3a (HEAD -> feature/documentacion, origin/feature/pruebas, feature/pruebas) test: agrega pruebas del modelo, logica funcional, flujo reactivo e ia
+* 5ce0c60 (origin/feature/api-reactiva, feature/api-reactiva) feat: expone endpoints reactivos y de publicidad
+* 9a20cd7 (origin/feature/ia-langchain4j, feature/ia-langchain4j) feat: integra langchain4j para publicidad de productos
+* 580bcde (origin/feature/servicio-reactivo, feature/servicio-reactivo) feat: implementa servicio reactivo con boundedElastic y operadores
+* bccdd97 (feature/modelo-inmutable) feat: agrega modelo inmutable de producto y logica funcional
+* f1ac0db (origin/feature/persistencia-jpa, feature/persistencia-jpa) feat: agrega entidad jpa de productos y siembra de datos
+* dd2730f (origin/feature/config-perfiles, feature/config-perfiles)  se configuró el perfil de prod con postgree y el puerto terminado en 72
+* d365139 (origin/main, origin/HEAD, main) se inicializa el proyect:
 ```
 
 **8.2** ¿Qué fase te tomó más tiempo del previsto y por qué?
 
->
+>Creería que la fase que más tiempo me llevó fue la fase 3 debido a que no me funcionaba linkear a mi bdd de postgre por la versión, luego al editar el archivo prod, resulta que no reconoce caracteres y al buscar me di cuenta que no estaba en formato UTF-8, sino ISO, y me salían varios bugs en la consola de PowerShell
+>Aunque otra de las fases que más me llevó tiempo fué la fase 4 porque requirió asegurar que la llamada síncrona y bloqueante de JPA hacia PostgreSQL no congelara el event loop de Netty.
 
 **8.3** Si tuvieras 30 minutos más, ¿qué mejorarías **primero** de tu entrega y por qué
 esa y no otra?
 
->
+>Mejoraría la lógica detras de la migración del repositorio a a Spring Data R2DBC en lugar de JPA/Hibernate, elegiría esta mejora antes que cualquier otra porque JPA por naturaleza utiliza controladores JDBC bloqueantes que requieren aislar los hilos con boundedElastic
 
 **8.4** Declara honestamente qué herramientas consultaste durante el examen
 (documentación, apuntes, asistentes de IA) y para qué. **Esta declaración no descuenta
 puntaje**; su omisión o falsedad sí constituye falta de honestidad académica.
 
->
+>usé Gemini como asesor de corrector de bugs y los commits para git y para solucionar varias cosas como las anteriormente mencionadas y mejorar porciones de código, tambien consulté en un grupo en discord de Mouredev para preguntar a las demás personas por qué me salia un error que ni Gemini ni Chatgtp me ayudaban a resolver y me indicaron como cambiar de ISO a UFT-8 porque ese ISO no reconoce tildes y da error, y UFT-8 reconoce strings
