@@ -274,18 +274,44 @@ Publicidad no disponible en este momento (RuntimeException)
 **7.1** Pega la salida real de tus pruebas (`./mvnw test` o `./gradlew test`).
 
 ```
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\annic\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.18\byte-buddy-agent-1.14.18.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.325 s -- in ec.edu.espe.agrosmart.AgrosmartApplicationTests
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in ec.edu.espe.agrosmart.domain.ProductoTest
+[INFO] Running ec.edu.espe.agrosmart.service.ProductoServiceTest
+[AgroSmart Log] Procesando ID: 1 - Nombre: CAFE 1
+[AgroSmart Log] Procesando ID: 2 - Nombre: CAFE 2
+[AgroSmart Log] Procesando ID: 3 - Nombre: CAFE 3
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.425 s -- in ec.edu.espe.agrosmart.service.ProductoServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.954 s
+[INFO] Finished at: 2026-07-31T19:09:19-05:00
+[INFO] ------------------------------------------------------------------------
 
 ```
 
 **7.2** ¿Cuántos productos espera tu `expectNextCount(...)` y por qué ese número
 concreto? Relaciónalo con tu semilla.
 
->
+>Mi expectNextCount(3) espera exactamente 3 productos.En los datos de prueba simulados creé 5 productos en total: 3 válidos y 2 inválidos (uno con precio de $\$0.00$ y otro con la lista de correos vacía). Como mi tubería reactiva aplica el filtro ProductoFilters.IS_VALID, mi servicio descartó automáticamente los 2 productos inválidos y dejó pasar únicamente los 3 productos válidos.
 
 **7.3** ¿Por qué mockeaste `ProductoRepository` en lugar de dejar que la prueba consulte
 PostgreSQL?
 
->
+>Mockeé ProductoRepository para crear una prueba unitaria pura y aislada. Si consultara PostgreSQL directamente, la prueba dependería de que la base de datos esté encendida, con conexión a red y con datos específicos cargados, volviéndola lenta y frágil. Al simular el repositorio con Mockito, controlo exactamente los datos que devuelve y garantizo que mi prueba sea ultra rápida, independiente y repetible en cualquier entorno.
 
 **7.4** ¿Qué demuestra `assertNotSame` que `assertEquals` **no** demuestra en tu prueba
 de copia defensiva?
@@ -295,8 +321,9 @@ de copia defensiva?
 **7.5** ¿Por qué una prueba de un `Flux` que no llama a `verifyComplete()` (o a
 `verify()`) no está probando nada?
 
->
-
+>En mi prueba de copia defensiva necesitase assertNotSame para demostrar que creé una instancia o lista nueva e independiente, y que no guardé una simple referencia al objeto externo original.
+>assertEquals solo comprueba que dos listas tengan el mismo contenido o los mismos elementos.
+>assertNotSame demuestra que las dos listas son objetos totalmente diferentes en memoria (diferente espacio de memoria RAM).
 ---
 
 ## Fase 8 — Integración y cierre
@@ -304,7 +331,6 @@ de copia defensiva?
 **8.1** Pega tu `git log --oneline --graph --all`.
 
 ```
-
 ```
 
 **8.2** ¿Qué fase te tomó más tiempo del previsto y por qué?
