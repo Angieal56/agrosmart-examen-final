@@ -4,10 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AgrosmartApplication {
+public class AgroSmartApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AgrosmartApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(AgroSmartApplication.class, args);
+    }
 }
