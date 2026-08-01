@@ -346,6 +346,7 @@ PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAF
 
 >Creería que la fase que más tiempo me llevó fue la fase 3 debido a que no me funcionaba linkear a mi bdd de postgre por la versión, luego al editar el archivo prod, resulta que no reconoce caracteres y al buscar me di cuenta que no estaba en formato UTF-8, sino ISO, y me salían varios bugs en la consola de PowerShell
 >Aunque otra de las fases que más me llevó tiempo fué la fase 4 porque requirió asegurar que la llamada síncrona y bloqueante de JPA hacia PostgreSQL no congelara el event loop de Netty.
+>Al momento de grabar todo se dañó, no entiendo por qué, se ocultaron los archivos, me salia error, incluso en el video se pudo observar el error que no pasó al momento de ir realizando y los errores que salian los iba resolviendo, perdí mucho tiempo intentando saber por qué no me aparecian los documentos, hasta las evidencias de fotos se ocultaron.
 
 **8.3** Si tuvieras 30 minutos más, ¿qué mejorarías **primero** de tu entrega y por qué
 esa y no otra?
