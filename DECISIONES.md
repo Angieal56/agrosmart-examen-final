@@ -242,17 +242,30 @@ respuesta que produjo tu `onErrorResume`.
 **6.1** Pega la salida real de tus cuatro `curl`.
 
 ```
-
+PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAFINAL\agrosmart-examen-final> curl.exe http://localhost:8172/api/productos
+[{"id":1,"nombre":"CAFE ARABIGO ESPECIAL LOJA","categoria":"Cafe","precioUsd":18.50,"correosNotificacion":["ventas@cafeloja.ec","export@cafeloja.ec"]},{"id":2,"nombre":"CAFE PREMIUM SUCUMBIOS","categoria":"Cafe","precioUsd":12.00,"correosNotificacion":["pedidos@premium.ec"]},{"id":3,"nombre":"CAFE DE ALTURA PICHINCHA ORGANICO","categoria":"Cafe","precioUsd":22.00,"correosNotificacion":["contacto@cafepichincha.com"]}]
+PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAFINAL\agrosmart-examen-final> curl.exe http://localhost:8172/api/productos/1
+{"id":1,"nombre":"Cafe Arabigo Especial Loja","categoria":"Cafe","precioUsd":18.50,"correosNotificacion":["ventas@cafeloja.ec","export@cafeloja.ec"]}
+PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAFINAL\agrosmart-examen-final> curl.exe -i http://localhost:8172/api/productos/9999
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 65
+{"error":"Producto con ID 9999 no fue encontrado en el sistema."}
+PS C:\Users\annic\OneDrive\08_ESPE\07_SEMESTRE\04_PROGRAMACIÓN_AVANZADA\PRUEBAFINAL\agrosmart-examen-final> curl.exe "http://localhost:8172/api/agrosmart/publicidad?producto=Cacao%20fino%20de%20aroma&audiencia=exportadores%20europeos"
+Publicidad no disponible en este momento (RuntimeException)
 ```
 
 **6.2** ¿Cómo lograste que el id inexistente responda **404** y no 500?
 
->
+>Lo logré mediante dos pasos en mi código:
+>-En mi servicio (ProductoService), cuando el ID no existe en la base de datos, utilizo switchIfEmpty para emitir reactivamente mi excepción personalizada ProductoNoEncontradoException.
+>-Creé la clase GlobalExceptionHandler anotada con @RestControllerAdvice. Allí intercepto la excepción con @ExceptionHandler(ProductoNoEncontradoException.class) y fuerzo la respuesta a retornar explícitamente un estado HttpStatus.NOT_FOUND (HTTP 404) con un cuerpo JSON de error, evitando que Spring devuelva el error genérico 500.
 
 **6.3** ¿Qué pasaría si tu controlador devolviera `List<Producto>` en lugar de
 `Flux<Producto>`? ¿Seguiría compilando? ¿Seguiría siendo no bloqueante?
 
->
+>Seguiría compilando? Sí, seguiría compilando sin problemas. Spring WebFlux admite tipos coleccionables tradicionales como List<T>. 
+>Seguiría siendo no bloqueante? No, perdería su comportamiento reactivo streaming. Para devolver una List<Producto>, mi aplicación se vería obligada a bloquear el hilo hasta esperar a que todos los elementos se consulten, carguen en memoria y se procesen por completo antes de enviar la primera respuesta al usuario. En cambio, con Flux<Producto> los datos se emiten y envían de forma asíncrona conforme van estando disponibles.
 
 ---
 
