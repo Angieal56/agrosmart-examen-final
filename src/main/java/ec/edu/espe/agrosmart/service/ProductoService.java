@@ -41,7 +41,7 @@ public class ProductoService {
                 .map(ProductoFilters.A_MAYUSCULAS)
                 .filter(ProductoFilters.IS_VALID)
                 .doOnNext(ProductoFilters.LOG_PRODUCTO)
-                .defaultIfEmpty(PRODUCTO_GENERICO);
+                .defaultIfEmpty(PRODUCTO_GENERICO); //------
     }
 
     public Mono<Producto> buscarPorId(Long id) {
@@ -49,7 +49,7 @@ public class ProductoService {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(Mono::justOrEmpty)
                 .map(ProductoMapper::toDominio)
-                .switchIfEmpty(Mono.error(new ProductoNoEncontradoException(id)));
+                .switchIfEmpty(Mono.error(new ProductoNoEncontradoException(id))); ///------
     }
 
     public Mono<String> generarPublicidad(String producto, String audiencia) {

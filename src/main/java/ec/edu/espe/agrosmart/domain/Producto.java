@@ -39,7 +39,7 @@ public final class Producto {
     }
 
     // Copia defensiva de SALIDA
-    public List<String> getCorreosNotificacion() {
+    public List<String> getCorreosNotificacion() { //-------
         return Collections.unmodifiableList(new ArrayList<>(correosNotificacion));
     }
 }
